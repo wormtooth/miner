@@ -5,8 +5,8 @@ from bs4 import BeautifulSoup
 
 
 class SoupMiner(Miner):
-    def build(self, req):
-        data = req.content.decode(req.encoding, 'ignore')
+    def build(self, response):
+        data = response.content.decode(response.encoding, 'ignore')
         dom = BeautifulSoup(data, 'lxml')
         self.parse(dom)
 

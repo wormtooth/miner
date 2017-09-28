@@ -1,61 +1,60 @@
 import requests
 import lxml.html as xhtml
+import logging
 
 HEADERS = {
-    'user-agent': "Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Win64; x64; Trident/5.0)",
-    'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    'connection': 'close'}
-TIMEOUT = 60
+    'user-agent': 'python/miner',
+    'connection': 'close'
+}
+
+# warning messages for logging
+WM_REQ = "'requests.{}' does not exist, 'requests.get' will be used"
+WM_DEC = "Decode error for {} is ignored"
 
 
 class Miner(list):
+    """A simple crawler/scraper
 
-    def __init__(self, url,
-                 headers=HEADERS,
-                 method='get',
-                 payload={},
-                 cookies={},
-                 proxies={},
-                 timeout=TIMEOUT):
-        self.url = url
-        self.headers = headers
-        self.method = method
-        self.payload = payload
-        self.cookies = cookies
-        self.proxies = proxies
-        self.timeout = timeout
+    Given a url, Miner will `fetch` the webpage according to a specified method
+    with possibly some optional arguments. The response will be passed to
+    `Miner.build` to build a dom using `lxml.html`, which will be passed to
+    `Miner.parser` for scraping.
+        
+    Args:
+        url (str): url to scrape.
+        method (str, optional): request method, default is `get`, which means
+            `requests.get` will be used. If `requests` module does not have this
+            specified method, a warning will be issued and `requests.get` will
+            be used instead.
+        **kwargs: optional keyword arguments for requests.
+    """
+    
+    def __init__(self, url, method='get', **kwargs):
         super(list, self).__init__()
-
+        self.url = url
+        self.method = method
+        self.kwargs = {'headers': HEADERS}
+        self.kwargs.update(kwargs)
         self.fetch()
 
     def parse(self, dom):
         pass
 
-    def build(self, req):
-        data = req.content.decode(req.encoding, 'ignore')
+    def build(self, response):
+        try:
+            data = response.content.decode(response.encoding)
+        except UnicodeDecodeError:
+            logging.warning(WM_DEC.format(response.url))
+            data = response.content.decode(response.encoding, 'ignore')
         dom = xhtml.fromstring(data)
         self.parse(dom)
 
     def fetch(self):
-        if self.method == 'get':
-            req = requests.get(url=self.url,
-                               headers=self.headers,
-                               cookies=self.cookies,
-                               params=self.payload,
-                               proxies=self.proxies,
-                               timeout=self.timeout)
-        else:
-            req = requests.post(url=self.url,
-                                headers=self.headers,
-                                cookies=self.cookies,
-                                data=self.payload,
-                                proxies=self.proxies,
-                                timeout=self.timeout)
-        req.raise_for_status()
-        self.build(req)
-
-
-class RawMiner(Miner):
-
-    def build(self, req):
-        self.parse(req)
+        try:
+            req_api = getattr(requests, self.method)
+        except AttributeError:
+            logging.warning(WM_REQ.format(self.method))
+            req_api = requests.get
+        response = req_api(url=self.url, **self.kwargs)
+        response.raise_for_status()
+        self.build(response)

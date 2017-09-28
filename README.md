@@ -1,6 +1,6 @@
 # Miner
 
-`Miner` is a very simple web crawler/scraper written in Python, inspired by [Sukhoi](https://github.com/iogf/sukhoi). It only requires [requests](http://docs.python-requests.org/en/master/) and [lxml](http://lxml.de/). It works under both python 2 and python 3. Here is a [blog post](https://wormtooth.com/20170912-simple-python-crawler/) I wrote about `Miner` in Chinese.
+`Miner` is a very simple web crawler/scraper written in Python, inspired by [Sukhoi](https://github.com/iogf/sukhoi). It only requires [requests](http://docs.python-requests.org/en/master/) and [lxml](http://lxml.de/). It works under both python 2 and python 3.
 
 # Usage
 
