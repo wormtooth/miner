@@ -18,8 +18,8 @@ class Miner(list):
     Given a url, Miner will `fetch` the webpage according to a specified method
     with possibly some optional arguments. The response will be passed to
     `Miner.build` to build a dom using `lxml.html`, which will be passed to
-    `Miner.parser` for scraping.
-        
+    `Miner.parse` for scraping.
+
     Args:
         url (str): url to scrape.
         method (str, optional): request method, default is `get`, which means
@@ -28,9 +28,9 @@ class Miner(list):
             be used instead.
         **kwargs: optional keyword arguments for requests.
     """
-    
+
     def __init__(self, url, method='get', **kwargs):
-        super(list, self).__init__()
+        super(Miner, self).__init__()
         self.url = url
         self.method = method
         self.kwargs = {'headers': HEADERS}
